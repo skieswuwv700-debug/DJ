@@ -6,7 +6,7 @@ local args = {
 }
 game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(unpack(args))
 
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+game:GetService("ReplicatedStorage"):WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer(table.unpack(args))
 
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
