@@ -1,11 +1,13 @@
-getgenv().Configs = {}
-getgenv().Configs.Mode = "drop" -- (trade, drop) ถ้าใส่ trade คือเทรดผล / ใส่ drop คือโยนผล
-getgenv().Configs.Helper = {
-    "",
-    "",
-    "",
-    ""
-}
+-- ตั้งค่า Config ผ่าน getgenv() ก่อน loadstring เช่น:
+-- getgenv().Configs = {}
+-- getgenv().Configs.Mode = "drop"
+-- getgenv().Configs.Helper = {"ชื่อ1","ชื่อ2","ชื่อ3","ชื่อ4"}
+
+if not getgenv().Configs then
+    getgenv().Configs = {}
+    getgenv().Configs.Mode = "drop"
+    getgenv().Configs.Helper = {"","","",""}
+end
 
 repeat wait() until (game:IsLoaded() and game.Players.LocalPlayer and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Main (minimal)"))
 
