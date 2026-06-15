@@ -109,7 +109,7 @@ end
 local function isHelperPlayer()
     local helpers = getgenv().Configs.Helper
     for i = 1, #helpers do
-        if helpers[i] == player.Name then
+        if string.lower(helpers[i]) == string.lower(player.Name) then
             return true
         end
     end
