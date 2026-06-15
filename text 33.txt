@@ -1,11 +1,10 @@
-getgenv().Configs = {
-    ["Mode"] = "drop", -- (trade, drop) ถ้าใส่ trade คือเทรดผล / ใส่ drop คือโยนผล
-    ["Helper"] = {
-        "",
-        "",
-        "",
-        ""
-    }
+getgenv().Configs = {}
+getgenv().Configs.Mode = "drop" -- (trade, drop) ถ้าใส่ trade คือเทรดผล / ใส่ drop คือโยนผล
+getgenv().Configs.Helper = {
+    "",
+    "",
+    "",
+    ""
 }
 
 repeat wait() until (game:IsLoaded() and game.Players.LocalPlayer and game:GetService("Players").LocalPlayer.PlayerGui:FindFirstChild("Main (minimal)"))
@@ -72,16 +71,13 @@ end
 local function tween(targetCFrame, _cancel)
     local TweenPart = workspace:FindFirstChild("TweenPart") or creatTweenPart()
     TweenPart.CFrame = player.Character.HumanoidRootPart.CFrame
-
     if getgenv().startTween then getgenv().startTween:Cancel() end
-
     local distance = (targetCFrame.Position - TweenPart.Position).Magnitude
     if distance < 1.5 then
         TweenPart.CFrame = targetCFrame
         isTweening = true
         return
     end
-
     local TweenService = game:GetService("TweenService")
     local tweenInfo = TweenInfo.new(distance / 300, Enum.EasingStyle.Linear)
     isTweening = true
@@ -107,10 +103,23 @@ local function equipTool(typeTool)
 end
 
 ------------------------------------------------------------------------
--- FRUIT HELPERS (ระบบโยนผลจาก doc4)
+-- HELPER CHECK
 ------------------------------------------------------------------------
 
--- หาผลในตัวหรือ backpack
+local function isHelperPlayer()
+    local helpers = getgenv().Configs.Helper
+    for i = 1, #helpers do
+        if helpers[i] == player.Name then
+            return true
+        end
+    end
+    return false
+end
+
+------------------------------------------------------------------------
+-- FRUIT HELPERS
+------------------------------------------------------------------------
+
 local function findPhysicalFruit()
     local backpack = player:FindFirstChild("Backpack")
     if backpack then
@@ -131,22 +140,15 @@ local function findPhysicalFruit()
     return nil
 end
 
--- โยนผลด้วย EatRemote (วิธีของ doc4)
 local function dropFruitByEatRemote(fruit)
     if not fruit then return false end
-
     local char = player.Character or character
     local backpack = player.Backpack
     if not char then return false end
-
-    -- เคลียร์ tool ในมือก่อน
     for _, child in ipairs(char:GetChildren()) do
-        if child:IsA("Tool") then
-            child.Parent = backpack
-        end
+        if child:IsA("Tool") then child.Parent = backpack end
     end
     task.wait(0.2)
-
     fruit.Parent = char
     local eatRemote = fruit:FindFirstChild("EatRemote")
     if not eatRemote then
@@ -154,28 +156,22 @@ local function dropFruitByEatRemote(fruit)
         warn("ไม่พบ EatRemote ในผลไม้: " .. fruit.Name)
         return false
     end
-
     local success, err = pcall(function()
         eatRemote:InvokeServer("Drop")
     end)
-
     if not success then
         warn("Drop fruit failed: " .. tostring(err))
         fruit.Parent = backpack
         return false
     end
-
     return true
 end
 
--- สุ่มผลไม้
 local function random()
     local success, err = pcall(function()
         ReplicatedStorage:WaitForChild("Remotes"):WaitForChild("CommF_"):InvokeServer("Cousin", "Buy", "DLCBoxData")
     end)
-    if not success then
-        warn("Random fruit failed: " .. tostring(err))
-    end
+    if not success then warn("Random fruit failed: " .. tostring(err)) end
     return success
 end
 
@@ -241,7 +237,7 @@ local function savePlayerData(username, items)
 end
 
 ------------------------------------------------------------------------
--- TRADE MODE (ไม่เปลี่ยน)
+-- TRADE MODE
 ------------------------------------------------------------------------
 
 local tradeChairPos = {
@@ -424,7 +420,7 @@ local function normalTrade()
     end
 end
 
-if getgenv().Configs["Mode"] == "trade" then
+if getgenv().Configs.Mode == "trade" then
     warn("in loop ...")
     savePlayerData(player.DisplayName, checkItem(getAllFruit()))
     task.wait(3)
@@ -434,7 +430,7 @@ if getgenv().Configs["Mode"] == "trade" then
 end
 
 ------------------------------------------------------------------------
--- DROP MODE (ระบบโยนผลจาก doc4)
+-- DROP MODE
 ------------------------------------------------------------------------
 
 local Progress
@@ -468,16 +464,6 @@ local dropFruitPos = {
     ["Helper"]    = CFrame.new(5847.72266, 1208.31042, 879.862549, -0.622320533, 7.22706872e-08, 0.782762527, -3.3727261e-08, 1, -1.19141951e-07, -0.782762527, -1.00544916e-07, -0.622320533),
     ["Skibidi67"] = CFrame.new(5844.11279, 1208.31042, 882.85321, 0.650864184, 3.9195438e-08, -0.759194136, -9.16891736e-08, 1, -2.69782916e-08, 0.759194136, 8.71690915e-08, 0.650864184)
 }
-
-local function isHelperPlayer()
-    local helpers = getgenv().Configs["Helper"]
-    for i = 1, #helpers do
-        if helpers[i] == player.Name then
-            return true
-        end
-    end
-    return false
-end
 
 local function getDropFruitPos()
     if isHelperPlayer() then return dropFruitPos["Helper"] end
@@ -514,22 +500,16 @@ local function hasFruit()
     return findPhysicalFruit() ~= nil
 end
 
--- โยนผลที่พิกัด drop โดยใช้ระบบ doc4
 local function dropFruitAtDropPos()
     if not moveToDropPos() then return false end
-
     local fruit = findPhysicalFruit()
     if not fruit then return false end
-
-    -- equip ก่อนถ้ายังอยู่ใน backpack
     local char = player.Character or character
+    if not char then return false end
     if fruit.Parent ~= char then
-        humanoid:EquipTool(fruit)
+        fruit.Parent = char
         task.wait(0.4)
-        fruit = findPhysicalFruit()
-        if not fruit or fruit.Parent ~= char then return false end
     end
-
     task.wait(0.2)
     local dropped = dropFruitByEatRemote(fruit)
     if dropped then task.wait(0.5) end
@@ -546,7 +526,6 @@ local function dropFruit()
     if not getCurrentHrp() then return end
 
     if isHelperPlayer() then
-        -- เช็คผลก่อน ถ้าไม่มีให้สุ่มทันที
         if shouldRandomFruit() then
             if random() then task.wait(1) end
             return
@@ -587,7 +566,7 @@ local function dropFruit()
     end
 end
 
-if getgenv().Configs["Mode"] == "drop" then
+if getgenv().Configs.Mode == "drop" then
     while true do task.wait()
         dropFruit()
     end
