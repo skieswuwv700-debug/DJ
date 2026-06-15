@@ -1,6 +1,9 @@
 getgenv().Configs = {
-    ["Mode"] = "drop", -- (trade, drop)
+    ["Mode"] = "drop", -- (trade, drop) ถ้าใส่ trade คือเทรดผล / ใส่ drop คือโยนผล
     ["Helper"] = {
+        "",
+        "",
+        "",
         ""
     }
 }
@@ -466,8 +469,18 @@ local dropFruitPos = {
     ["Skibidi67"] = CFrame.new(5844.11279, 1208.31042, 882.85321, 0.650864184, 3.9195438e-08, -0.759194136, -9.16891736e-08, 1, -2.69782916e-08, 0.759194136, 8.71690915e-08, 0.650864184)
 }
 
+local function isHelperPlayer()
+    local helpers = getgenv().Configs["Helper"]
+    for i = 1, #helpers do
+        if helpers[i] == player.Name then
+            return true
+        end
+    end
+    return false
+end
+
 local function getDropFruitPos()
-    if table.find(getgenv().Configs["Helper"], player.Name) then return dropFruitPos["Helper"] end
+    if isHelperPlayer() then return dropFruitPos["Helper"] end
     return dropFruitPos["Skibidi67"]
 end
 
@@ -481,10 +494,6 @@ end
 
 local DROP_DISTANCE = 2
 local DROP_OFFSET_DONE = CFrame.new(-20, 0, 0)
-
-local function isHelperPlayer()
-    return table.find(getgenv().Configs["Helper"], player.Name) ~= nil
-end
 
 local function moveToDropPos(offset)
     local currentHrp = getCurrentHrp()
