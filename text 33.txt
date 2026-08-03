@@ -199,16 +199,33 @@ local fruitsCost = {
 }
 
 local function getAllFruit()
-    local itemData = require(game:GetService("ReplicatedStorage").Economy.ItemId.RawSource)
-    local allFruit = {}
+    local itemData = require(ReplicatedStorage.Economy.ItemId.RawSource)
+
+    local fruitMap = {}
     for _, data in pairs(itemData) do
         if data.Id and data.Id.Type == "Fruit" then
-            local itemName, itemId = data.Id.StorageKey, data.Id.ItemId
-            if not allFruit[itemName] then allFruit[itemName] = {} end
-            table.insert(allFruit[itemName], itemId)
+            fruitMap[data.Id.ItemId] = data.Id.StorageKey
         end
     end
-    return allFruit
+
+    local ok, service = pcall(function()
+        return require(ReplicatedStorage.ItemReplicationService)
+    end)
+    if not ok or not service then return {} end
+
+    local found = {}
+    local result = {}
+    local items = service:GetItems()
+    for _, v in pairs(items or {}) do
+        if type(v) == "table" and fruitMap[v.ItemId] then
+            local name = fruitMap[v.ItemId]
+            if not found[name] then
+                found[name] = true
+                table.insert(result, name)
+            end
+        end
+    end
+    return result
 end
 
 local function checkItem(targetList)
@@ -346,7 +363,15 @@ local function calculateTotalValue(_me, _them)
         end
     end
     if not bestResult then return nil end
-    local fruitIdsByName = getAllFruit()
+    local itemData = require(ReplicatedStorage.Economy.ItemId.RawSource)
+    local fruitIdsByName = {}
+    for _, data in pairs(itemData) do
+        if data.Id and data.Id.Type == "Fruit" then
+            local itemName = data.Id.StorageKey
+            if not fruitIdsByName[itemName] then fruitIdsByName[itemName] = {} end
+            table.insert(fruitIdsByName[itemName], data.Id.ItemId)
+        end
+    end
     local result = {}
     for _, fruit in ipairs(bestResult.me) do
         local fruitIds = fruitIdsByName[fruit.name]
@@ -384,7 +409,7 @@ local function helperTrade()
             tween(workspace._WorldOrigin.Locations.Mansion.CFrame * CFrame.new(0,100,0), true)
             warn("none fruit to add"); task.wait(10)
         end
-        savePlayerData(player.DisplayName, checkItem(getAllFruit()))
+        savePlayerData(player.DisplayName, getAllFruit())
     elseif not isSit() then
         tp(tradeChairPos[1]); task.wait(1)
     end
@@ -420,7 +445,7 @@ local function normalTrade()
             tween(workspace._WorldOrigin.Locations.Mansion.CFrame * CFrame.new(0,100,0), true)
             warn("none fruit to add"); task.wait(10)
         end
-        savePlayerData(player.DisplayName, checkItem(getAllFruit()))
+        savePlayerData(player.DisplayName, getAllFruit())
     elseif not isSit() then
         tp(getTradeChairPos()); task.wait(1)
     end
@@ -428,7 +453,7 @@ end
 
 if getgenv().Configs.Mode == "trade" then
     warn("in loop ...")
-    savePlayerData(player.DisplayName, checkItem(getAllFruit()))
+    savePlayerData(player.DisplayName, getAllFruit())
     task.wait(3)
     while true do task.wait()
         if sucsessTradeQuest() then helperTrade() else normalTrade() end
