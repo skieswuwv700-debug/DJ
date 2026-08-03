@@ -203,7 +203,7 @@ local function getAllFruit()
 
     local fruitMap = {}
     for _, data in pairs(itemData) do
-        if data.Id and data.Id.Type == "Fruit" then
+        if data.Id and data.Id.Type == "PhysicalFruit" then
             fruitMap[data.Id.ItemId] = data.Id.StorageKey
         end
     end
@@ -366,7 +366,7 @@ local function calculateTotalValue(_me, _them)
     local itemData = require(ReplicatedStorage.Economy.ItemId.RawSource)
     local fruitIdsByName = {}
     for _, data in pairs(itemData) do
-        if data.Id and data.Id.Type == "Fruit" then
+        if data.Id and data.Id.Type == "PhysicalFruit" then
             local itemName = data.Id.StorageKey
             if not fruitIdsByName[itemName] then fruitIdsByName[itemName] = {} end
             table.insert(fruitIdsByName[itemName], data.Id.ItemId)
