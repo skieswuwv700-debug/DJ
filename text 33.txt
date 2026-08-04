@@ -229,12 +229,17 @@ local function getAllFruit()
 end
 
 local function checkItem(targetList)
-    local InventoryController = require(ReplicatedStorage.Controllers.UI.Inventory)
+    local ok, service = pcall(function()
+        return require(ReplicatedStorage.ItemReplicationService)
+    end)
+    if not ok or not service then return {} end
+
+    local items = service:GetItems()
     local foundIds = {}
-    for _, item in pairs(InventoryController:GetTiles()) do
-        for name, target in pairs(targetList) do
-            if item.ItemId == target[1] then
-                if not foundIds[name] then
+    for _, v in pairs(items or {}) do
+        if type(v) == "table" then
+            for name, target in pairs(targetList) do
+                if v.ItemId == target[1] and not foundIds[name] then
                     table.insert(foundIds, name)
                     foundIds[name] = true
                 end
