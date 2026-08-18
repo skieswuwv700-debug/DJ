@@ -583,8 +583,6 @@ local function dropFruit()
 
         moveToDropPos()
     else
-        moveToDropPos()
-
         if sucsessDropQuest() then
             if hasFruit() then
                 dropFruitAtDropPos()
@@ -593,6 +591,8 @@ local function dropFruit()
             end
             return
         end
+
+        moveToDropPos()
 
         if dropFruitAtDropPos() then return end
 
