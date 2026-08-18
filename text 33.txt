@@ -562,6 +562,8 @@ local function dropFruit()
     if not getCurrentHrp() then return end
 
     if isHelperPlayer() then
+        moveToDropPos()
+
         if shouldRandomFruit() then
             if random() then task.wait(1) end
             return
@@ -581,6 +583,8 @@ local function dropFruit()
 
         moveToDropPos()
     else
+        moveToDropPos()
+
         if sucsessDropQuest() then
             if hasFruit() then
                 dropFruitAtDropPos()
