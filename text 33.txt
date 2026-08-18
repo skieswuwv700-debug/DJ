@@ -523,7 +523,7 @@ local function moveToDropPos(offset)
     local target = getDropFruitPos()
     if offset then target = target * offset end
     if (currentHrp.Position - target.Position).Magnitude > DROP_DISTANCE then
-        tp(target); task.wait(0.2)
+        tween(target, true); task.wait(0.2)
     end
     return true
 end
@@ -536,32 +536,12 @@ local function hasFruit()
     return findPhysicalFruit() ~= nil
 end
 
-local function dropFruitAtDropPos()
-    if not moveToDropPos() then return false end
-    local fruit = findPhysicalFruit()
-    if not fruit then return false end
-    local char = player.Character or character
-    if not char then return false end
-    if fruit.Parent ~= char then
-        fruit.Parent = char
-        task.wait(0.4)
-    end
-    task.wait(0.2)
-    local dropped = dropFruitByEatRemote(fruit)
-    if dropped then task.wait(0.5) end
-    return dropped
-end
-
-local function sucsessDropQuest()
-    local item = {["BlueBelt"]={211}}
-    if checkItem(item)["BlueBelt"] then return true end
-    return false
-end
-
 local function dropFruit()
     if not getCurrentHrp() then return end
 
     if isHelperPlayer() then
+        moveToDropPos()
+
         if shouldRandomFruit() then
             if random() then task.wait(1) end
             return
