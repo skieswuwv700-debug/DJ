@@ -517,12 +517,17 @@ end
 local DROP_DISTANCE = 2
 local DROP_OFFSET_DONE = CFrame.new(-20, 0, 0)
 
+local FLY_DISTANCE = 30
+
 local function moveToDropPos(offset)
     local currentHrp = getCurrentHrp()
     if not currentHrp then return false end
     local target = getDropFruitPos()
     if offset then target = target * offset end
-    if (currentHrp.Position - target.Position).Magnitude > DROP_DISTANCE then
+    local dist = (currentHrp.Position - target.Position).Magnitude
+    if dist > FLY_DISTANCE then
+        tween(target, true); task.wait(0.2)
+    elseif dist > DROP_DISTANCE then
         tp(target); task.wait(0.2)
     end
     return true
